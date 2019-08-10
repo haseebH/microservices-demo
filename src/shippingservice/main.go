@@ -29,9 +29,7 @@ import (
 	"go.opencensus.io/trace"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -56,7 +54,13 @@ func init() {
 	}
 	log.Out = os.Stdout
 }
-
+func mustMapEnv(target *string, envKey string) {
+	v := os.Getenv(envKey)
+	if v == "" {
+		panic(fmt.Sprintf("environment variable %q not set", envKey))
+	}
+	*target = v
+}
 func main() {
 	go initTracing()
 	go initProfiling("shippingservice", "1.0.0")
@@ -76,7 +80,7 @@ func main() {
 	pb.RegisterShippingServiceServer(srv, svc)
 	healthpb.RegisterHealthServer(srv, svc)
 	log.Infof("Shipping Service listening on port %s", port)
-
+	mustMapEnv(&svc.StorageService, "STORAGE_SERVICE_ADDR")
 	// Register reflection service on gRPC server.
 	reflection.Register(srv)
 	if err := srv.Serve(lis); err != nil {
@@ -85,15 +89,13 @@ func main() {
 }
 
 // server controls RPC service responses.
-type server struct{}
+type server struct {
+	StorageService string
+}
 
 // Check is for health checking.
 func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
-}
-
-func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
-	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
 // GetQuote produces a shipping quote (cost) in USD.
@@ -128,11 +130,28 @@ func (s *server) ShipOrder(ctx context.Context, in *pb.ShipOrderRequest) (*pb.Sh
 	// 1. Create a Tracking ID
 	baseAddress := fmt.Sprintf("%s, %s, %s", in.Address.StreetAddress, in.Address.City, in.Address.State)
 	id := CreateTrackingId(baseAddress)
+	_ = s.sendDataToStorage(ctx, in, id)
 
 	// 2. Generate a response.
 	return &pb.ShipOrderResponse{
 		TrackingId: id,
 	}, nil
+}
+func (s *server) sendDataToStorage(ctx context.Context, in *pb.ShipOrderRequest, trackerId string) error {
+	conn, err := grpc.DialContext(ctx, s.StorageService, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
+	if err != nil {
+		return fmt.Errorf("could not connect currency service: %+v", err)
+	}
+	defer conn.Close()
+	result, err := pb.NewStorageServiceClient(conn).StoreOrder(context.TODO(), &pb.StorageRequest{
+		TrackingId:    trackerId,
+		ShippingOrder: in,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to convert currency: %+v", err)
+	}
+	log.Println(result)
+	return nil
 }
 
 func initJaegerTracing() {
@@ -167,32 +186,32 @@ func initStats(exporter *stackdriver.Exporter) {
 	}
 }
 
-func initStackdriverTracing() {
+func initStackDriverTracing() {
 	// TODO(ahmetb) this method is duplicated in other microservices using Go
 	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
 		exporter, err := stackdriver.NewExporter(stackdriver.Options{})
 		if err != nil {
-			log.Warnf("failed to initialize Stackdriver exporter: %+v", err)
+			log.Warnf("failed to initialize stackdriver exporter: %+v", err)
 		} else {
 			trace.RegisterExporter(exporter)
 			trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
-			log.Info("registered Stackdriver tracing")
+			log.Info("registered stackdriver tracing")
 
 			// Register the views to collect server stats.
 			initStats(exporter)
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver exporter", d)
+		log.Infof("sleeping %v to retry initializing stackdriver exporter", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver exporter after retrying, giving up")
+	log.Warn("could not initialize stackdriver exporter after retrying, giving up")
 }
 
 func initTracing() {
 	initJaegerTracing()
-	initStackdriverTracing()
+	initStackDriverTracing()
 }
 
 func initProfiling(service, version string) {
@@ -207,12 +226,12 @@ func initProfiling(service, version string) {
 		}); err != nil {
 			log.Warnf("failed to start profiler: %+v", err)
 		} else {
-			log.Info("started Stackdriver profiler")
+			log.Info("started stackdriver profiler")
 			return
 		}
 		d := time.Second * 10 * time.Duration(i)
-		log.Infof("sleeping %v to retry initializing Stackdriver profiler", d)
+		log.Infof("sleeping %v to retry initializing stackdriver profiler", d)
 		time.Sleep(d)
 	}
-	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+	log.Warn("could not initialize stackdriver profiler after retrying, giving up")
 }
