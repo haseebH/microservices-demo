@@ -244,3 +244,19 @@ message Ad {
     // short advertisement text to display.
     string text = 2;
 }
+
+
+//------------Storage Service---------------------
+service StorageService {
+    rpc StoreOrder(StorageRequest) returns (StorageResponse) {}
+}
+
+message StorageRequest {
+    string tracking_id = 1;
+    ShipOrderRequest shipping_order = 2 ;
+}
+
+message StorageResponse {
+     string Status = 1;
+}
+
