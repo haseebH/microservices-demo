@@ -86,20 +86,8 @@ func main() {
 	mustMapEnv(&Password, "MYSQL_PASSWORD")
 	mustMapEnv(&DbName, "MYSQL_DB")
 
-	////initialize mysql Connection
-	m, err := NewSQLConnection()
-	if err != nil {
-		log.Warnf("could not parse product catalog")
-	}
-	mysql = m
-	defer mysql.db.Close()
-	/////read products from database
-	err = readCatalogFile(&cat)
-	if err != nil {
-		log.Warnf("could not parse product catalog")
-	}
-	/////////////////////////////////////
-
+	////create MySQL Connection
+	initMysqlConnection()
 	// set injected latency
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
 		v, err := time.ParseDuration(s)
@@ -228,6 +216,21 @@ func initProfiling(service, version string) {
 		time.Sleep(d)
 	}
 	log.Warn("could not initialize Stackdriver profiler after retrying, giving up")
+}
+
+func initMysqlConnection() {
+	////initialize mysql Connection
+	m, err := NewSQLConnection()
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
+	mysql = m
+	/////read products from database
+	err = readCatalogFile(&cat)
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
+	/////////////////////////////////////
 }
 
 type productCatalog struct{}

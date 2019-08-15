@@ -12,16 +12,6 @@ const DRIVER = "mysql"
 type MySQL struct {
 	db *sql.DB
 }
-type ProductMysql struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	Picture      string `json:"picture"`
-	CurrencyCode string `json:"price_usd_currency_code"`
-	Units        int64  `json:"price_usd_units"`
-	Nanos        int32  `json:"price_usd_nanos"`
-	Categories   string `json:"categories"`
-}
 
 func NewSQLConnection() (*MySQL, error) {
 	this := MySQL{}
