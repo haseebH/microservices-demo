@@ -15,11 +15,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/signal"
@@ -33,7 +32,6 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ocgrpc"
@@ -45,13 +43,16 @@ import (
 )
 
 var (
-	cat          pb.ListProductsResponse
-	catalogMutex *sync.Mutex
-	log          *logrus.Logger
-	extraLatency time.Duration
-
-	port = "3550"
-
+	cat           pb.ListProductsResponse
+	catalogMutex  *sync.Mutex
+	log           *logrus.Logger
+	extraLatency  time.Duration
+	mysql         *MySQL
+	port          = "3550"
+	Endpoint      string
+	UserName      string
+	Password      string
+	DbName        string
 	reloadCatalog bool
 )
 
@@ -67,16 +68,37 @@ func init() {
 	}
 	log.Out = os.Stdout
 	catalogMutex = &sync.Mutex{}
-	err := readCatalogFile(&cat)
-	if err != nil {
-		log.Warnf("could not parse product catalog")
-	}
-}
 
+}
+func mustMapEnv(target *string, envKey string) {
+	v := os.Getenv(envKey)
+	if v == "" {
+		panic(fmt.Sprintf("environment variable %q not set", envKey))
+	}
+	*target = v
+}
 func main() {
 	go initTracing()
 	go initProfiling("productcatalogservice", "1.0.0")
 	flag.Parse()
+	mustMapEnv(&Endpoint, "MYSQL_ENDPOINT")
+	mustMapEnv(&UserName, "MYSQL_USERNAME")
+	mustMapEnv(&Password, "MYSQL_PASSWORD")
+	mustMapEnv(&DbName, "MYSQL_DB")
+
+	////initialize mysql Connection
+	m, err := NewSQLConnection()
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
+	mysql = m
+	defer mysql.db.Close()
+	/////read products from database
+	err = readCatalogFile(&cat)
+	if err != nil {
+		log.Warnf("could not parse product catalog")
+	}
+	/////////////////////////////////////
 
 	// set injected latency
 	if s := os.Getenv("EXTRA_LATENCY"); s != "" {
@@ -213,13 +235,14 @@ type productCatalog struct{}
 func readCatalogFile(catalog *pb.ListProductsResponse) error {
 	catalogMutex.Lock()
 	defer catalogMutex.Unlock()
-	catalogJSON, err := ioutil.ReadFile("products.json")
-	if err != nil {
-		log.Fatalf("failed to open product catalog json file: %v", err)
-		return err
+	if mysql == nil {
+		log.Fatal("mysql connection not initialized")
+		return errors.New("mysql connection not initialized")
 	}
-	if err := jsonpb.Unmarshal(bytes.NewReader(catalogJSON), catalog); err != nil {
-		log.Warnf("failed to parse the catalog JSON: %v", err)
+
+	catalog, err := mysql.ReadProducts()
+	if err != nil {
+		log.Fatalf("failed to open product catalog: %v", err)
 		return err
 	}
 	log.Info("successfully parsed product catalog json")

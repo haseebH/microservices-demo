@@ -25,7 +25,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a85b0dc359de4812d383ee6670f0dae595cfcb8b13ff6b872bdb013a18c37b07"
+  digest = "1:5d81d8f33688f1f34a7cd5232037b98009a4b7f6b26efcd34a1301dd198ea730"
   name = "git.apache.org/thrift.git"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
@@ -33,18 +33,17 @@
   source = "github.com/apache/thrift"
 
 [[projects]]
-  digest = "1:9370265bab17bdc207051ccedc34535484a12622a329839e580059c79236c1e3"
-  name = "github.com/GoogleCloudPlatform/microservices-demo"
-  packages = ["src/productcatalogservice/genproto"]
+  digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "27df445fc20f048c1c31e429f6c29075119fe454"
-  version = "v0.1.1"
+  revision = "72cd26f257d44c1114970e19afddcd812016007e"
+  version = "v1.4.1"
 
 [[projects]]
-  digest = "1:fd0a0705475581c7eb965259d417706cb49f42bde408502c3b53f139b7253d67"
+  digest = "1:1d3ad0f6a57c08e2168089a64c34313930571fcbe5359d71c608a97ce504f7ca"
   name = "github.com/golang/protobuf"
   packages = [
-    "jsonpb",
     "proto",
     "protoc-gen-go/descriptor",
     "ptypes",
@@ -220,10 +219,11 @@
   revision = "aae1d1b89c27132abe4fa22731a2a61e7089079c"
 
 [[projects]]
-  digest = "1:2c26b1c47556c0e5e73cdb05d8361c463737eee4baac35d38b40c728c3074a94"
+  digest = "1:31521c35d153515cf1be44b4231590b06f44b4941cf2aee5e96719fbe6cc70b8"
   name = "google.golang.org/appengine"
   packages = [
     ".",
+    "cloudsql",
     "internal",
     "internal/app_identity",
     "internal/base",
@@ -321,8 +321,7 @@
   input-imports = [
     "cloud.google.com/go/profiler",
     "contrib.go.opencensus.io/exporter/stackdriver",
-    "github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto",
-    "github.com/golang/protobuf/jsonpb",
+    "github.com/go-sql-driver/mysql",
     "github.com/golang/protobuf/proto",
     "github.com/google/go-cmp/cmp",
     "github.com/sirupsen/logrus",
