@@ -25,6 +25,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -110,6 +112,13 @@ func main() {
 type server struct {
 	session    *session.Session
 	bucketName string
+}
+
+func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
+}
+func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_WatchServer) error {
+	return status.Errorf(codes.Unimplemented, "health check via Watch not implemented")
 }
 
 func (s *server) StoreOrder(ctx context.Context, in *pb.StorageRequest) (*pb.StorageResponse, error) {
