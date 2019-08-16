@@ -5,7 +5,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build and push Docker image
+          name: frontend Build and push Docker image
           command: |
             cd src/frontend
             sudo docker build -t haseebh/frontend:${CIRCLE_BUILD_NUM} .
@@ -13,7 +13,7 @@ jobs:
             sudo docker push haseebh/frontend:${CIRCLE_BUILD_NUM}
             #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/frontend","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
       - run:
-          name: Build and push Docker image
+          name: productcatalog Build and push Docker image
           command: |
             cd src/productcatalogservice
             sudo docker build -t haseebh/productcatalogservice:${CIRCLE_BUILD_NUM} .
@@ -21,7 +21,7 @@ jobs:
             sudo docker push haseebh/productcatalogservice:${CIRCLE_BUILD_NUM}
             #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/productcatalogservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
       - run:
-          name: Build and push Docker image
+          name: storageservice Build and push Docker image
           command: |
             cd src/storageservice
             sudo docker build -t haseebh/storageservice:${CIRCLE_BUILD_NUM} .
@@ -29,10 +29,18 @@ jobs:
             sudo docker push haseebh/storageservice:${CIRCLE_BUILD_NUM}
             #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/storageservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
       - run:
-          name: Build and push Docker image
+          name: shippingservice Build and push Docker image
           command: |
             cd src/shippingservice
             sudo docker build -t haseebh/shippingservice:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/shippingservice:${CIRCLE_BUILD_NUM}
             #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/shippingservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+      - run:
+          name: checkout Build and push Docker image
+          command: |
+            cd src/checkoutservice
+            sudo docker build -t haseebh/checkoutservice:${CIRCLE_BUILD_NUM} .
+            sudo docker login -u "$username" -p "$password"
+            sudo docker push haseebh/checkoutservice:${CIRCLE_BUILD_NUM}
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/checkoutservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
