@@ -1,11 +1,11 @@
 # Hipster Shop: Cloud-Native Microservices Demo Application
 
-This project contains a 10-tier microservices application. The application is a
+This project contains a 11-tier microservices application. The application is a
 web-based e-commerce app called **“Hipster Shop”** where users can browse items,
 add them to the cart, and purchase them.
 
 **Google uses this application to demonstrate use of technologies like
-Kubernetes/GKE, Istio, Stackdriver, gRPC and OpenCensus**. This application
+Kubernetes/GKE, Istio, Stackdriver, gRPC, AWS, AZURE and OpenCensus**. This application
 works on any Kubernetes cluster (such as a local one), as well as Google
 Kubernetes Engine. It’s **easy to deploy with little to no configuration**.
 
@@ -38,7 +38,8 @@ Find **Protocol Buffers Descriptions** at the [`./pb` directory](./pb).
 | [productcatalogservice](./src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
 | [currencyservice](./src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
 | [paymentservice](./src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](./src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
+| [shippingservice](./src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)       
+| [storageservice](./src/storageservice)             | Go            | Store tracking id and shipped items in a file storage (s3).     
 | [emailservice](./src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
 | [checkoutservice](./src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
 | [recommendationservice](./src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
