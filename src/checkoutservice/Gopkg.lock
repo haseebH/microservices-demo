@@ -25,23 +25,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a85b0dc359de4812d383ee6670f0dae595cfcb8b13ff6b872bdb013a18c37b07"
+  digest = "1:5d81d8f33688f1f34a7cd5232037b98009a4b7f6b26efcd34a1301dd198ea730"
   name = "git.apache.org/thrift.git"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
   revision = "286eee16b147a302ddc7b10740c5e5401ebbec17"
   source = "github.com/apache/thrift"
-
-[[projects]]
-  digest = "1:4287343c81d259e828b2e3b579270139a498a2168fbab81d89c3b9926b4ec740"
-  name = "github.com/GoogleCloudPlatform/microservices-demo"
-  packages = [
-    "src/checkoutservice/genproto",
-    "src/checkoutservice/money",
-  ]
-  pruneopts = "UT"
-  revision = "27df445fc20f048c1c31e429f6c29075119fe454"
-  version = "v0.1.1"
 
 [[projects]]
   digest = "1:1d3ad0f6a57c08e2168089a64c34313930571fcbe5359d71c608a97ce504f7ca"
@@ -128,7 +117,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2f357867bf425774d35beca5be718402a4488b8b23b1563ce8c5bb91d09285a7"
+  digest = "1:afddad1f6084741be16f281ee3df55a51051214223e3f6a894faaa008703500d"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -138,6 +127,7 @@
     "http2/hpack",
     "idna",
     "internal/timeseries",
+    "publicsuffix",
     "trace",
   ]
   pruneopts = "UT"
@@ -312,14 +302,20 @@
   revision = "1d89a3c832915b2314551c1d2a506874d62e53f7"
   version = "v1.22.0"
 
+[[projects]]
+  digest = "1:41206f4d0410803e64cfb203f665330c3183988408cb532b56305a816a87bd99"
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "fa5875c0caa5c260ab78acec5a244215a730247f"
+  version = "v1.12.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "cloud.google.com/go/profiler",
     "contrib.go.opencensus.io/exporter/stackdriver",
-    "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto",
-    "github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money",
     "github.com/golang/protobuf/proto",
     "github.com/google/uuid",
     "github.com/sirupsen/logrus",
@@ -332,6 +328,7 @@
     "google.golang.org/grpc/codes",
     "google.golang.org/grpc/health/grpc_health_v1",
     "google.golang.org/grpc/status",
+    "gopkg.in/resty.v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

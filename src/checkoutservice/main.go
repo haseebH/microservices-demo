@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"gopkg.in/resty.v1"
 	"net"
 	"os"
 	"time"
@@ -65,6 +66,7 @@ type checkoutService struct {
 	currencySvcAddr       string
 	shippingSvcAddr       string
 	emailSvcAddr          string
+	emailSvcDNS           string
 	paymentSvcAddr        string
 }
 
@@ -83,6 +85,7 @@ func main() {
 	mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
+	mustMapEnv(&svc.emailSvcDNS, "EMAIL_SERVICE_DNS")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
 
 	log.Infof("service config: %+v", svc)
@@ -382,7 +385,21 @@ func (cs *checkoutService) chargeCard(ctx context.Context, amount *pb.Money, pay
 }
 
 func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email string, order *pb.OrderResult) error {
-	conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
+	req := resty.New()
+
+	resp, err := req.R().
+		SetBody(&pb.SendOrderConfirmationRequest{Email: email, Order: order}).
+		SetHeader("Host", cs.emailSvcDNS).
+		SetHeader("Content-Type", "application/json").
+		Post(cs.emailSvcAddr)
+	if err != nil {
+		log.Errorf("unable to send email %v", err)
+		return err
+	}
+	log.Println(resp)
+	return nil
+
+	/*conn, err := grpc.DialContext(ctx, cs.emailSvcAddr, grpc.WithInsecure(), grpc.WithStatsHandler(&ocgrpc.ClientHandler{}))
 	if err != nil {
 		return fmt.Errorf("failed to connect email service: %+v", err)
 	}
@@ -390,7 +407,7 @@ func (cs *checkoutService) sendOrderConfirmation(ctx context.Context, email stri
 	_, err = pb.NewEmailServiceClient(conn).SendOrderConfirmation(ctx, &pb.SendOrderConfirmationRequest{
 		Email: email,
 		Order: order})
-	return err
+	return err*/
 }
 
 func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
