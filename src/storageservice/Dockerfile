@@ -10,14 +10,14 @@ WORKDIR /go/src/$PROJECT
 COPY Gopkg.* ./
 RUN dep ensure --vendor-only -v
 COPY . .
-RUN go build -gcflags='-N -l' -o /storageservice .
+RUN go build  -o /go/bin/storageservice .
 
 FROM alpine as release
 RUN apk add --no-cache ca-certificates
 RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x /bin/grpc_health_probe
-COPY --from=builder /storageservice /storageservice
+COPY --from=builder /go/bin/storageservice /storageservice
 ENV APP_PORT=50055
 EXPOSE 50055
 ENTRYPOINT ["/storageservice"]
