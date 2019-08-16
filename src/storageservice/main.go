@@ -15,25 +15,20 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	pb "github.com/GoogleCloudPlatform/microservices-demo/src/storageservice/genproto"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/GoogleCloudPlatform/microservices-demo/src/storageservice/storage"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strings"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"net"
-	"net/http"
 	"os"
 	"time"
 )
@@ -75,23 +70,36 @@ func main() {
 	}
 	port = fmt.Sprintf(":%s", port)
 
-	accessKey := ""
-	secretKey := ""
-	region := ""
 	svc := &server{}
-	mustMapEnv(&accessKey, "AWS_ACCESS_KEY")
-	mustMapEnv(&secretKey, "AWS_ACCESS_SECRET")
-	mustMapEnv(&svc.bucketName, "AWS_BUCKET_NAME")
-	mustMapEnv(&region, "AWS_BUCKET_REGION")
-	/*e := gin.New()
-	e.POST("/shipping",deployService)
-	e.Run( port)*/
-	s, err := createSession(accessKey, secretKey, region)
-	if err != nil {
-		panic(fmt.Sprint(err.Error()))
-
+	cloudprovider := ""
+	mustMapEnv(&cloudprovider, "CLOUD_PROVIDER")
+	switch strings.ToLower(cloudprovider) {
+	case "aws":
+		accessKey := ""
+		secretKey := ""
+		region := ""
+		bucket := ""
+		mustMapEnv(&accessKey, "AWS_ACCESS_KEY")
+		mustMapEnv(&secretKey, "AWS_ACCESS_SECRET")
+		mustMapEnv(&bucket, "AWS_BUCKET_NAME")
+		mustMapEnv(&region, "AWS_BUCKET_REGION")
+		s3, err := storage.NewS3Connection(accessKey, secretKey, region, bucket)
+		if err != nil {
+			log.Fatalf("connection failed: %v", err)
+		}
+		svc.session = s3
+	case "gcp":
+		bucket := ""
+		mustMapEnv(&bucket, "GCP_BUCKET_NAME")
+		gcs, err := storage.NewGcsConnection(bucket)
+		if err != nil {
+			log.Fatalf("connection failed: %v", err)
+		}
+		svc.session = gcs
+	default:
+		log.Fatalf("cloudprovder %s not supported", cloudprovider)
 	}
-	svc.session = s
+
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -110,8 +118,7 @@ func main() {
 }
 
 type server struct {
-	session    *session.Session
-	bucketName string
+	session storage.Storage
 }
 
 func (s *server) Check(ctx context.Context, req *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
@@ -123,31 +130,12 @@ func (s *server) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Health_Watc
 
 func (s *server) StoreOrder(ctx context.Context, in *pb.StorageRequest) (*pb.StorageResponse, error) {
 	resp := new(pb.StorageResponse)
-	service := s3.New(s.session)
 
-	raw, err := json.Marshal(in)
-	if err != nil {
-		resp.Status = err.Error()
-		return resp, err
-	}
-	_, err = service.PutObject(&s3.PutObjectInput{
-		Bucket:               aws.String(s.bucketName),
-		Key:                  aws.String(in.TrackingId),
-		ACL:                  aws.String("private"),
-		Body:                 bytes.NewReader(raw),
-		ContentLength:        aws.Int64(int64(len(raw))),
-		ContentType:          aws.String(http.DetectContentType(raw)),
-		ContentDisposition:   aws.String("attachment"),
-		ServerSideEncryption: aws.String("AES256"),
-	})
+	err := s.session.Store(in)
 	if err != nil {
 		resp.Status = err.Error()
 		return resp, err
 	}
 	resp.Status = " order data inserted successfully"
 	return resp, nil
-}
-func createSession(accessKey, secretKey, region string) (*session.Session, error) {
-	creds := credentials.NewStaticCredentials(accessKey, secretKey, "")
-	return session.NewSession(&aws.Config{Region: aws.String(region), Credentials: creds})
 }
