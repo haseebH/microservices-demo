@@ -226,38 +226,42 @@ func initMysqlConnection() {
 	}
 	mysql = m
 	/////read products from database
-	err = readCatalogFile(&cat)
+	cat1, err := readCatalogFile()
 	if err != nil {
 		log.Warnf("could not parse product catalog")
 	}
+	cat = *cat1
+	log.Println(cat)
 	/////////////////////////////////////
 }
 
 type productCatalog struct{}
 
-func readCatalogFile(catalog *pb.ListProductsResponse) error {
+func readCatalogFile() (catalog *pb.ListProductsResponse, err error) {
 	catalogMutex.Lock()
 	defer catalogMutex.Unlock()
 	if mysql == nil {
 		log.Fatal("mysql connection not initialized")
-		return errors.New("mysql connection not initialized")
+		return catalog, errors.New("mysql connection not initialized")
 	}
 
-	catalog, err := mysql.ReadProducts()
+	catalog, err = mysql.ReadProducts()
 	if err != nil {
 		log.Fatalf("failed to open product catalog: %v", err)
-		return err
+		return catalog, err
 	}
-	log.Info("successfully parsed product catalog json")
-	return nil
+	log.Info("successfully parsed product catalog json", catalog)
+
+	return catalog, nil
 }
 
 func parseCatalog() []*pb.Product {
 	if reloadCatalog || len(cat.Products) == 0 {
-		err := readCatalogFile(&cat)
+		cat1, err := readCatalogFile()
 		if err != nil {
 			return []*pb.Product{}
 		}
+		cat = *cat1
 	}
 	return cat.Products
 }
