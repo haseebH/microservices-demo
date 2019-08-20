@@ -7,11 +7,19 @@ jobs:
       - run:
           name: frontend Build and push Docker image
           command: |
+            cd src/cartservice
+            sudo docker build -t haseebh/cartservice:${CIRCLE_BUILD_NUM} .
+            sudo docker login -u "$username" -p "$password"
+            sudo docker push haseebh/cartservice:${CIRCLE_BUILD_NUM}
+            curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/cartservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
+      - run:
+          name: frontend Build and push Docker image
+          command: |
             cd src/frontend
             sudo docker build -t haseebh/frontend:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/frontend:${CIRCLE_BUILD_NUM}
-            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/frontend","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/frontend","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: productcatalog Build and push Docker image
           command: |
@@ -19,7 +27,7 @@ jobs:
             sudo docker build -t haseebh/productcatalogservice:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/productcatalogservice:${CIRCLE_BUILD_NUM}
-            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/productcatalogservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/productcatalogservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: storageservice Build and push Docker image
           command: |
@@ -27,7 +35,7 @@ jobs:
             sudo docker build -t haseebh/storageservice:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/storageservice:${CIRCLE_BUILD_NUM}
-            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/storageservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/storageservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: shippingservice Build and push Docker image
           command: |
@@ -35,7 +43,7 @@ jobs:
             sudo docker build -t haseebh/shippingservice:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/shippingservice:${CIRCLE_BUILD_NUM}
-            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/shippingservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/shippingservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: checkout Build and push Docker image
           command: |
@@ -43,4 +51,4 @@ jobs:
             sudo docker build -t haseebh/checkoutservice:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/checkoutservice:${CIRCLE_BUILD_NUM}
-            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/checkoutservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["demo-dry-run-p1"]}' https://sapis.cloudplex.cf/cp-next-gen-cd/api/v1/cpcd
+            #curl --request POST -H "Content-Type: application/json" --data '{"image_name":"haseebh/checkoutservice","image_tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "projects":["hipstershop-app-d1"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment

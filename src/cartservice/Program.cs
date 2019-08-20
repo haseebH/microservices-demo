@@ -29,7 +29,7 @@ namespace cartservice
         const string CART_SERVICE_ADDRESS = "LISTEN_ADDR";
         const string REDIS_ADDRESS = "REDIS_ADDR";
         const string CART_SERVICE_PORT = "PORT";
-
+        const string REDIS_PASSWORD = "REDIS_PASSWORD";
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
         {
@@ -41,6 +41,9 @@ namespace cartservice
 
             [Option('r', "redis", HelpText = "The ip of redis cache")]
             public string Redis { get; set; }
+
+            [Option('p', "redis_password", HelpText = "The password of redis cache")]
+            public string RedisPassowrd { get; set; }
         }
 
         static object StartServer(string host, int port, ICartStore cartStore)
@@ -136,13 +139,13 @@ namespace cartservice
                             // Set redis cache host (hostname+port)
                             ICartStore cartStore;
                             string redis = ReadRedisAddress(options.Redis);
-
+                            string password = ReadRedisPassword(options.RedisPassowrd);
                             // Redis was specified via command line or environment variable
                             if (!string.IsNullOrEmpty(redis))
                             {
                                 // If you want to start cart store using local cache in process, you can replace the following line with this:
                                 // cartStore = new LocalCartStore();
-                                cartStore = new RedisCartStore(redis);
+                                cartStore = new RedisCartStore(redis,password);
 
                                 return StartServer(hostname, port, cartStore);
                             }
@@ -179,5 +182,23 @@ namespace cartservice
 
             return null;
         }
+
+        private static string ReadRedisPassword(string password)
+        {
+            if (!string.IsNullOrEmpty(password))
+            {
+                return password;
+            }
+
+            string pass = Environment.GetEnvironmentVariable(REDIS_PASSWORD);
+            if (!string.IsNullOrEmpty(pass))
+            {
+                return pass;
+            }
+
+            return null;
+        }
+
+
     }
 }
