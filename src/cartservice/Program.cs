@@ -30,6 +30,7 @@ namespace cartservice
         const string REDIS_ADDRESS = "REDIS_ADDR";
         const string CART_SERVICE_PORT = "PORT";
         const string REDIS_PASSWORD = "REDIS_PASSWORD";
+        const string REDIS_SSL = "REDIS_SSL";
         [Verb("start", HelpText = "Starts the server listening on provided port")]
         class ServerOptions
         {
@@ -44,6 +45,8 @@ namespace cartservice
 
             [Option('p', "redis_password", HelpText = "The password of redis cache")]
             public string RedisPassowrd { get; set; }
+            [Option('p', "redis_ssl", HelpText = "The password of redis cache")]
+            public string RedisSSL { get; set; }
         }
 
         static object StartServer(string host, int port, ICartStore cartStore)
@@ -140,12 +143,13 @@ namespace cartservice
                             ICartStore cartStore;
                             string redis = ReadRedisAddress(options.Redis);
                             string password = ReadRedisPassword(options.RedisPassowrd);
+                            string ssl = ReadRedisSSL(options.RedisSSL);
                             // Redis was specified via command line or environment variable
                             if (!string.IsNullOrEmpty(redis))
                             {
                                 // If you want to start cart store using local cache in process, you can replace the following line with this:
                                 // cartStore = new LocalCartStore();
-                                cartStore = new RedisCartStore(redis,password);
+                                cartStore = new RedisCartStore(redis,password,ssl);
 
                                 return StartServer(hostname, port, cartStore);
                             }
@@ -199,6 +203,21 @@ namespace cartservice
             return null;
         }
 
+        private static string ReadRedisSSL(string ssl)
+        {
+            if (!string.IsNullOrEmpty(ssl))
+            {
+                return ssl;
+            }
 
+            string redis_ssl = Environment.GetEnvironmentVariable(REDIS_SSL);
+            if (!string.IsNullOrEmpty(redis_ssl))
+            {
+                return redis_ssl;
+            }
+
+            return "false";
+
+        }
     }
 }
