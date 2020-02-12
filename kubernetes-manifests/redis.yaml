@@ -50,7 +50,8 @@ spec:
             memory: 200Mi
       volumes:
       - name: redis-data
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: pv-claim-demo
 ---
 apiVersion: v1
 kind: Service
@@ -64,3 +65,38 @@ spec:
   - name: redis
     port: 6379
     targetPort: 6379
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: faster
+provisioner: <cloudprovider info>			//cloudprovider dependent configurations
+parameters:
+  type: <cloudprovider volume type>						//cloudprovider dependent configurations
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-claim-demo
+spec:
+  storageClassName: "faster"
+  volumeName: pv-demo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1G
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-demo
+spec:
+  storageClassName: "faster"
+  capacity:
+    storage: 1G
+  accessModes:
+    - ReadWriteOnce
