@@ -15,53 +15,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: emailservice
+  name: redis-cart
 spec:
   selector:
     matchLabels:
-      app: emailservice
+      app: redis-cart
   template:
     metadata:
       labels:
-        app: emailservice
+        app: redis-cart
     spec:
-      terminationGracePeriodSeconds: 5
       containers:
-      - name: server
-        image: emailservice
+      - name: redis
+        image: redis:alpine
         ports:
-        - containerPort: 8080
-        env:
-        - name: PORT
-          value: "8080"
+        - containerPort: 6379
         readinessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          tcpSocket:
+            port: 6379
         livenessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        env:
-        - name: ENABLE_PROFILER
-          value: "0"
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
         resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
           limits:
-            cpu: 200m
-            memory: 128Mi
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: pv-claim-demo
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: emailservice
-spec:
-  type: ClusterIP
-  selector:
-    app: emailservice
-  ports:
-  - name: grpc
-    port: 5000
-    targetPort: 8080
+
+
+

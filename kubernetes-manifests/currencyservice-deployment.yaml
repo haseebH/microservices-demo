@@ -15,31 +15,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: paymentservice
+  name: currencyservice
 spec:
   selector:
     matchLabels:
-      app: paymentservice
+      app: currencyservice
   template:
     metadata:
       labels:
-        app: paymentservice
+        app: currencyservice
     spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: paymentservice
+        image: currencyservice
         ports:
-        - containerPort: 50051
+        - name: grpc
+          containerPort: 7000
         env:
         - name: PORT
-          value: "50051"
+          value: "7000"
         readinessProbe:
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
         livenessProbe:
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
         resources:
           requests:
             cpu: 100m
@@ -47,16 +48,3 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: paymentservice
-spec:
-  type: ClusterIP
-  selector:
-    app: paymentservice
-  ports:
-  - name: grpc
-    port: 50051
-    targetPort: 50051

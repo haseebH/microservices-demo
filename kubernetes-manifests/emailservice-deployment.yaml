@@ -15,32 +15,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: currencyservice
+  name: emailservice
 spec:
   selector:
     matchLabels:
-      app: currencyservice
+      app: emailservice
   template:
     metadata:
       labels:
-        app: currencyservice
+        app: emailservice
     spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: currencyservice
+        image: emailservice
         ports:
-        - name: grpc
-          containerPort: 7000
+        - containerPort: 8080
         env:
         - name: PORT
-          value: "7000"
+          value: "8080"
         readinessProbe:
+          periodSeconds: 5
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
         livenessProbe:
+          periodSeconds: 5
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        env:
+        - name: ENABLE_PROFILER
+          value: "0"
         resources:
           requests:
             cpu: 100m
@@ -48,16 +52,4 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: currencyservice
-spec:
-  type: ClusterIP
-  selector:
-    app: currencyservice
-  ports:
-  - name: grpc
-    port: 7000
-    targetPort: 7000
+
