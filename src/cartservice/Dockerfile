@@ -24,6 +24,10 @@ RUN apk add --no-cache \
     libintl \
     icu \
     libressl-dev
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.8/main' >> /etc/apk/repositories &&
+    apk update --no-cache &&
+    apk add --no-cache bash libc6-compat=1.1.19-r11
+
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENTRYPOINT ["./cartservice", "start"]
