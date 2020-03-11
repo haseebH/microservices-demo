@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2-alpine as builder
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102-alpine as builder
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
