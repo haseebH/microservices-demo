@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:3.1-sdk-alpine as builder
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2-alpine as builder
 WORKDIR /app
 COPY . .
 RUN dotnet restore && \
@@ -23,7 +23,7 @@ RUN apk add --no-cache \
     libstdc++ \
     libintl \
     icu \
-    libressl-dev 
+    libressl-dev
 WORKDIR /app
 COPY --from=builder /cartservice .
 ENTRYPOINT ["./cartservice", "start"]
