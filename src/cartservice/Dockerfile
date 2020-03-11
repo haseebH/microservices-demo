@@ -16,7 +16,6 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.2.0 && \
 # busybox-extras => telnet
 RUN apk add --no-cache \
     busybox-extras \
-    libc6-compat \
     libunwind \
     libuuid \
     libgcc \
