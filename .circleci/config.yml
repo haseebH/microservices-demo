@@ -5,7 +5,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: frontend Build and push Docker image
+          name: cart Build and push Docker image
           command: |
             cd src/cartservice
             sudo docker build -t haseebh/cartservice:${CIRCLE_BUILD_NUM} .
@@ -19,7 +19,7 @@ jobs:
             sudo docker build -t haseebh/frontend:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/frontend:${CIRCLE_BUILD_NUM}
-            curl --request POST -H "Content-Type: application/json" -H "token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.CnsKICAidGVhbXNfcm9sZXMiOnsic2FuZGJveCsiOiJUZWFtIExlYWQiLCJCYWNrZW5kIjoiVGVhbSBMZWFkIn0sCiAgImlzcyI6ImNsb3VkcGxleCIsCiAgImV4cCI6IjE1Njk3MzQ5MDM5NzUiLAogICJ0b2tlbl90eXBlIjoidXNlciIsCiAgInVzZXJuYW1lIjoiaGFzZWViQGNsb3VkcGxleC5pbyIsCiAgImNvbXBhbnlJZCI6IjVkNWE2MWU3NTI0OWMwMDAwN2JmZmU3OSIsCiAgImlzQWRtaW4iOiJ0cnVlIiwKICAibXlyb2xlcyI6WyJTdXBlci1Vc2VyIiwiQWRtaW4iLCJUZWFtIExlYWQiLCJUZWFtIExlYWQiXQp9CiAgICAgIA.rPycBgGobqbXeO1SehBRMdY5L9gkjrAodS4KoE41CLk" --data '{"image":"haseebh/frontend","tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "project_ids":["hipstershop-app"]}' https://sapis.cloudplex.cf/rabbit/api/v1/cd/trigger/deployment
+            curl --request POST -H "Content-Type: application/json" -H "token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.CnsKICAidGVhbXNfcm9sZXMiOnsiQmFja2VuZCBUZWFtIjoiVGVhbSBMZWFkIn0sCiAgImlzcyI6ImNsb3VkcGxleCIsCiAgImV4cCI6IjAiLAogICJ1c2VybmFtZSI6Imhhc2VlYkBjbG91ZHBsZXguaW8iLAogICJjb21wYW55SWQiOiI1ZGFhYzRkZjZhOWUyZjAwMWM3ZDgzYjAiLAogICAiY29tcGFueU5hbWUiOiJjbG91ZHBsZXgiLAogICJpc0FkbWluIjoiZmFsc2UiLAogICJ0b2tlbl90eXBlIjoiMSIsCiAgIm15cm9sZXMiOlsiU3VwZXItVXNlciIsIlRlYW0gTGVhZCJdCn0KICAgICAg.o0LR5YL31RfexdGCWZO0QYVJJ5iiX3-ot7pFYKEmVcw" --data '{"image":"haseebh/frontend","tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "project_ids":["application-3j10ci"]}' https://app.cloudplex.io/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: productcatalog Build and push Docker image
           command: |
