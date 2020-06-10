@@ -19,7 +19,7 @@ jobs:
             sudo docker build -t haseebh/frontend:${CIRCLE_BUILD_NUM} .
             sudo docker login -u "$username" -p "$password"
             sudo docker push haseebh/frontend:${CIRCLE_BUILD_NUM}
-            curl --request POST -H "Content-Type: application/json" -H "token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.CnsKICAidGVhbXNfcm9sZXMiOnsiQmFja2VuZCBUZWFtIjoiVGVhbSBMZWFkIn0sCiAgImlzcyI6ImNsb3VkcGxleCIsCiAgImV4cCI6IjAiLAogICJ1c2VybmFtZSI6Imhhc2VlYkBjbG91ZHBsZXguaW8iLAogICJjb21wYW55SWQiOiI1ZGFhYzRkZjZhOWUyZjAwMWM3ZDgzYjAiLAogICAiY29tcGFueU5hbWUiOiJjbG91ZHBsZXgiLAogICJpc0FkbWluIjoiZmFsc2UiLAogICJ0b2tlbl90eXBlIjoiMSIsCiAgIm15cm9sZXMiOlsiU3VwZXItVXNlciIsIlRlYW0gTGVhZCJdCn0KICAgICAg.o0LR5YL31RfexdGCWZO0QYVJJ5iiX3-ot7pFYKEmVcw" --data '{"image":"haseebh/frontend","tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "project_ids":["application-3j10ci"]}' https://app.cloudplex.io/rabbit/api/v1/cd/trigger/deployment
+            curl --request POST -H "Content-Type: application/json" -H "token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55SWQiOiI1ZGFhYzRkZjZhOWUyZjAwMWM3ZDgzYjAiLCJleHAiOiIxNTkwMTYzOTQwODk3IiwiaXNBZG1pbiI6ImZhbHNlIiwiaXNzIjoiQ2xvdWRwbGV4IiwibXlyb2xlcyI6WyJTdXBlci1Vc2VyIiwiVGVhbSBMZWFkIl0sInRlYW1zX3JvbGVzIjp7IkJhY2tlbmQgVGVhbSI6IlRlYW0gTGVhZCJ9LCJ0b2tlbl90eXBlIjoiMSIsInVzZXJuYW1lIjoiaGFzZWViQGNsb3VkcGxleC5pbyJ9.AXtG5fJhGjXL6fbIrsNpIfKjpKulguj-_maAAbXO194" --data '{"image":"haseebh/frontend","tag": "'"${CIRCLE_BUILD_NUM}"'" , "type":"container", "project_ids":["application-mm72xt"]}' https://app.cloudplex.io/rabbit/api/v1/cd/trigger/deployment
       - run:
           name: productcatalog Build and push Docker image
           command: |
